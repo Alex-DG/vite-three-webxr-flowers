@@ -5,6 +5,8 @@ WebXR - Hit Test API
 This is an experiment using augmented reality features with the WebXR Device API.
 Upon entering AR, enjoy the flowers! 🌻
 
+[Live Demo](https://vite-three-webxr-flowers.vercel.app/)
+
 ## Setup
 
 Run the following commands:
