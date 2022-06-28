@@ -1,0 +1,86 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100vh;
+  font-family: Arial, Helvetica, Arial, sans-serif;
+  background-color: rgb(71, 71, 160);
+}
+
+#app > .container {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+}
+
+#app > .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1em;
+
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+}
+#app > .container > h1,
+p {
+  color: rgb(247, 247, 247);
+}
+#app > .container a {
+  color: rgb(255, 105, 180);
+}
+#app > .container p {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  padding: 0.8em;
+  margin: 1.5em;
+  border-radius: 8px;
+  background-color: rgb(255, 105, 180);
+}
+#app > button {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+
+  color: rgb(255, 255, 255);
+  background-color: rgb(27, 27, 31, 0.9);
+  border: 1px solid #fff;
+  padding: 1.5em;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+#ARButton {
+  border: 2px solid rgb(255, 255, 255) !important;
+  color: rgb(255, 255, 255) !important;
+}
+
+#experience {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  outline: none;
+}
