@@ -7,11 +7,11 @@ html,
 body {
   height: 100%;
   font-family: Arial, Helvetica, Arial, sans-serif;
-  background-color: rgb(113 86 203 / 53%);
+  background-color: rgb(46 163 78 / 43%);
 }
 
 #app > .loading {
-  background: linear-gradient(45deg, rgb(159 112 161), transparent);
+  background: linear-gradient(45deg, rgb(224, 203, 81, 0.5), transparent);
   position: absolute;
   width: 100%;
   height: 100%;
@@ -90,7 +90,8 @@ p {
   padding: 0.8em;
   margin: 1.5em;
   border-radius: 8px;
-  background-color: rgb(255, 105, 180);
+  /* background-color: rgb(255, 105, 180); */
+  background-color: rgb(11 12 10 / 20%);
 }
 #app > button {
   position: absolute;
