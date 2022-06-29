@@ -3,14 +3,15 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js'
 
+import { getRandomFloat, getRandomNumber } from './utils/math'
 import {
   browserHasImmersiveArCompatibility,
   displayUnsupportedBrowserMessage,
   handleXRHitTest,
 } from './utils/xr'
-import { getRandomFloat } from './utils/math'
 
 import modelSrc from '../../assets/models/sunflower-v1.glb'
+import { createSunflower } from './utils/sunflower'
 
 const DRACO_DECODER_PATH =
   'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/'
@@ -26,7 +27,6 @@ class Experience {
     this.growthSpeed = []
     this.scales = []
 
-    this.defaultSpeed = options.speed || 0.025
     this.defaultScalar = options.scale || 0
 
     // WebXR
@@ -60,33 +60,33 @@ class Experience {
   //////////////////////////////////////////////////////////////////////////////
 
   onSceneReady() {
-    // Hide Loading
     this.loading = document.querySelector('.loading')
     this.loading.style.opacity = '0'
-
-    // Add AR Button
     this.setARButton()
+    console.log('🤖', 'Experience initialized!')
   }
 
   onSelect() {
     if (this.marker?.visible) {
-      const model = this.sunflower.clone()
+      const totalFlowers = getRandomNumber(1, 5)
+      const sunflowers = []
 
-      model.position.setFromMatrixPosition(this.marker.matrix)
-      model.rotation.setFromRotationMatrix(this.marker.matrix)
+      for (let i = 0; i < totalFlowers; i++) {
+        const sunflower = createSunflower(this.sunflower, this.marker.matrix)
+        const scale = {
+          value: sunflower.scale.clone(),
+          maxScale: getRandomFloat(0.4, 0.7),
+        }
 
-      // Rotate the model randomly to give a bit of variation to the scene.
-      model.rotation.y = Math.random() * (Math.PI * 2)
-      model.visible = true
+        this.flowers.push(sunflower)
+        this.growthSpeed.push(this.defaultScalar)
+        this.scales.push(scale)
 
-      this.flowers.push(model)
-      this.growthSpeed.push(this.defaultScalar)
-      this.scales.push({
-        value: model.scale.clone(),
-        maxScale: getRandomFloat(0.5, 0.7),
-      })
+        sunflowers.push(sunflower)
+      }
+      this.scene.add(...sunflowers)
 
-      this.scene.add(model)
+      console.log('🌻🌻🌻')
     }
   }
 
@@ -124,7 +124,7 @@ class Experience {
   }
 
   setLight() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
     this.scene.add(ambientLight)
   }
 
@@ -171,7 +171,7 @@ class Experience {
     const boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1)
     const boxMaterial = new THREE.MeshBasicMaterial({
       wireframe: true,
-      color: 'hotpink',
+      color: '#FFFF00',
     })
     this.box = new THREE.Mesh(boxGeometry, boxMaterial)
     this.box.position.z = -3
@@ -186,8 +186,8 @@ class Experience {
 
       // Update material
       this.sunflower.traverse((child) => {
+        // Sunflower mesh
         if (child.isMesh && child.name === 'Object_2') {
-          // Sunflower mesh
           const material = child.material
           const map = material.map
           material.emissive = new THREE.Color('#FFFF00')
@@ -199,7 +199,7 @@ class Experience {
       })
       this.isReady = true
 
-      console.log('🌻', 'Experience initialized', {
+      console.log('🌻', 'Model loaded', {
         sunflower: this.sunflower,
       })
 
@@ -208,18 +208,16 @@ class Experience {
   }
 
   setMarker() {
-    const planeMarkerMaterial = new THREE.MeshBasicMaterial({
+    const markerMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
       opacity: 0.7,
     })
-    const planeMarkerGeometry = new THREE.RingBufferGeometry(
-      0.15,
-      0.2,
-      32
-    ).rotateX(-Math.PI / 2)
+    const markerGeometry = new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(
+      -Math.PI / 2
+    )
 
-    this.marker = new THREE.Mesh(planeMarkerGeometry, planeMarkerMaterial)
+    this.marker = new THREE.Mesh(markerGeometry, markerMaterial)
     this.marker.matrixAutoUpdate = false
     this.scene.add(this.marker)
   }
@@ -246,7 +244,7 @@ class Experience {
       let growthSpeed = this.growthSpeed[index]
       let scale = this.scales[index].value
 
-      growthSpeed += this.defaultSpeed
+      growthSpeed += getRandomFloat(0.02, 0.03, 3)
 
       scale.x += growthSpeed
       scale.y += growthSpeed
@@ -280,7 +278,6 @@ class Experience {
             onHitTestResultReady: (hitPoseTransformed) =>
               this.onHitTestResultReady(hitPoseTransformed),
           }
-
           handleXRHitTest(this.renderer, frame, callbacks)
         }
         this.updateFlowers()

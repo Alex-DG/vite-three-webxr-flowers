@@ -5,7 +5,7 @@
 
 html,
 body {
-  height: 100vh;
+  height: 100%;
   font-family: Arial, Helvetica, Arial, sans-serif;
   background-color: rgb(113 86 203 / 53%);
 }

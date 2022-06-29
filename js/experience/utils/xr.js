@@ -6,10 +6,10 @@ export const browserHasImmersiveArCompatibility = async () => {
   if (window.navigator.xr) {
     const isSupported = await navigator.xr.isSessionSupported('immersive-ar')
     console.info(
-      `[DEBUG] ${
+      `${
         isSupported
-          ? 'Browser supports immersive-ar'
-          : 'Browser does not support immersive-ar'
+          ? '✅ Browser supports immersive-ar'
+          : '❌ Browser does not support immersive-ar'
       }`
     )
     return isSupported
