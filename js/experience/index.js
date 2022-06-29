@@ -26,7 +26,7 @@ class Experience {
     this.growthSpeed = []
     this.scales = []
 
-    this.defaultSpeed = options.speed || 0.00025
+    this.defaultSpeed = options.speed || 0.025
     this.defaultScalar = options.scale || 0
 
     // WebXR
@@ -45,7 +45,6 @@ class Experience {
     this.setSizes()
     this.setCamera()
     this.setRenderer()
-    this.setARButton()
     this.setBox()
     this.setFlower()
     this.setMarker()
@@ -58,23 +57,61 @@ class Experience {
     this.onSelect = this.onSelect.bind(this)
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+
+  onSceneReady() {
+    // Hide Loading
+    this.loading = document.querySelector('.loading')
+    this.loading.style.opacity = '0'
+
+    // Add AR Button
+    this.setARButton()
+  }
+
   onSelect() {
     if (this.marker?.visible) {
       const model = this.sunflower.clone()
 
       model.position.setFromMatrixPosition(this.marker.matrix)
+      model.rotation.setFromRotationMatrix(this.marker.matrix)
+
       // Rotate the model randomly to give a bit of variation to the scene.
-      model.rotation.z = Math.random() * (Math.PI * 2)
+      model.rotation.y = Math.random() * (Math.PI * 2)
       model.visible = true
 
       this.flowers.push(model)
       this.growthSpeed.push(this.defaultScalar)
       this.scales.push({
         value: model.scale.clone(),
-        maxScale: getRandomFloat(0.001, 0.005),
+        maxScale: getRandomFloat(0.5, 0.7),
       })
+
       this.scene.add(model)
     }
+  }
+
+  onSessionEnd() {
+    this.marker.visible = false
+
+    this.scene.remove(...this.flowers)
+
+    this.flowers = []
+    this.growthSpeed = []
+    this.scales = []
+
+    this.renderer.clear()
+    console.log('👋', 'Session ended')
+  }
+
+  onHitTestResultReady(hitPoseTransformed) {
+    if (hitPoseTransformed) {
+      this.marker.visible = true
+      this.marker.matrix.fromArray(hitPoseTransformed)
+    }
+  }
+
+  onHitTestResultEmpty() {
+    this.marker.visible = false
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -87,7 +124,7 @@ class Experience {
   }
 
   setLight() {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
     this.scene.add(ambientLight)
   }
 
@@ -124,9 +161,10 @@ class Experience {
 
   setARButton() {
     // Create the AR button element, configure our XR session, and append it to the DOM.
-    document.body.appendChild(
-      ARButton.createButton(this.renderer, { requiredFeatures: ['hit-test'] })
-    )
+    this.arButton = ARButton.createButton(this.renderer, {
+      requiredFeatures: ['hit-test'],
+    })
+    document.body.appendChild(this.arButton)
   }
 
   setBox() {
@@ -143,29 +181,38 @@ class Experience {
 
   setFlower() {
     this.loader.load(modelSrc, (gltf) => {
-      this.sunflower = gltf.scene.children[0].children[0].children[0]
+      this.sunflower = gltf.scene
       this.sunflower.scale.multiplyScalar(this.defaultScalar)
-      this.sunflower.rotation.x = -Math.PI / 2
 
       // Update material
-      const material = this.sunflower.material
-      const map = material.map
-      material.emissive = new THREE.Color('#FFFF00')
-      material.emissiveIntensity = 0.8
-      material.emissiveMap = map
-      material.color.convertSRGBToLinear()
-      map.encoding = THREE.sRGBEncoding
-
+      this.sunflower.traverse((child) => {
+        if (child.isMesh && child.name === 'Object_2') {
+          // Sunflower mesh
+          const material = child.material
+          const map = material.map
+          material.emissive = new THREE.Color('#FFFF00')
+          material.emissiveIntensity = 0.8
+          material.emissiveMap = map
+          material.color.convertSRGBToLinear()
+          map.encoding = THREE.sRGBEncoding
+        }
+      })
       this.isReady = true
 
       console.log('🌻', 'Experience initialized', {
         sunflower: this.sunflower,
       })
+
+      this.onSceneReady()
     })
   }
 
   setMarker() {
-    const planeMarkerMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+    const planeMarkerMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.7,
+    })
     const planeMarkerGeometry = new THREE.RingBufferGeometry(
       0.15,
       0.2,
@@ -218,34 +265,6 @@ class Experience {
     }
   }
 
-  onSessionEnd() {
-    this.marker.visible = false
-
-    this.scene.remove(...this.flowers)
-
-    this.flowers = []
-    this.growthSpeed = []
-    this.scales = []
-
-    this.renderer.clear()
-
-    console.log('👋', 'Session ended')
-  }
-
-  onHitTestResultReady(hitPoseTransformed) {
-    if (hitPoseTransformed) {
-      this.marker.visible = true
-      this.marker.matrix.fromArray(hitPoseTransformed)
-
-      // TODO: rotate model following the marker position, i.e: vertical wall
-      // this.sunflower.matrix.fromArray(hitPoseTransformed)
-    }
-  }
-
-  onHitTestResultEmpty() {
-    this.marker.visible = false
-  }
-
   update() {
     const renderLoop = (_, frame) => {
       if (!this.isReady) return
@@ -264,13 +283,10 @@ class Experience {
 
           handleXRHitTest(this.renderer, frame, callbacks)
         }
-
         this.updateFlowers()
       }
-
       this.renderer.render(this.scene, this.camera)
     }
-
     this.renderer.setAnimationLoop(renderLoop)
   }
 }

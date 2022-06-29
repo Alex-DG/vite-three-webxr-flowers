@@ -14,9 +14,13 @@ document.querySelector('#app').innerHTML = `
    <p id="ar-details">
     This is an experiment using augmented reality features with the WebXR Device API.<br></br>
 
-    Upon entering AR, enjoy the flowers! 🌻
+    Upon entering AR, enjoy the sunflowers!
    </p>
  </div>
+
+ <div class="loading">
+    <h2>Loading 🌻</h2>
+  </div>
 `
 
 /**
