@@ -58,13 +58,14 @@ class Experience {
 
   bind() {
     this.onSelect = this.onSelect.bind(this)
-    this.onEndSession = this.onEndSession.bind(this)
+    this.onShutdown = this.onShutdown.bind(this)
   }
 
   //////////////////////////////////////////////////////////////////////////////
 
   onSceneReady() {
     loadingVisible(false)
+    this.setFlowerMarker()
     this.setARButton()
     console.log('🤖', 'Experience initialized!')
   }
@@ -89,14 +90,17 @@ class Experience {
       }
       this.scene.add(...sunflowers)
 
+      this.flowerMarker.visible = false
+
       console.log('🌻🌻🌻')
     }
   }
 
   onSessionEnd() {
     this.marker.visible = false
+    this.flowerMarker.visible = false
 
-    this.scene.remove(...this.flowers)
+    this.scene.remove(...this.flowers, this.flowerMarker)
 
     this.flowers = []
     this.growthSpeed = []
@@ -108,19 +112,22 @@ class Experience {
     console.log('👋', 'Session ended')
   }
 
-  onEndSession() {
+  onShutdown() {
     shutdownXR(this.renderer)
   }
 
   onSessionStart() {
-    console.log('SET CLICK! ok!!!')
-    this.endSessionBtn?.addEventListener('click', this.onEndSession)
+    this.scene.add(this.flowerMarker)
+    this.endSessionBtn?.addEventListener('click', this.onShutdown)
   }
 
   onHitTestResultReady(hitPoseTransformed) {
     if (hitPoseTransformed) {
       this.marker.visible = true
       this.marker.matrix.fromArray(hitPoseTransformed)
+
+      this.flowerMarker.visible = true
+      this.flowerMarker.matrix.fromArray(hitPoseTransformed)
     }
   }
 
@@ -196,6 +203,21 @@ class Experience {
     this.scene.add(this.box)
   }
 
+  setFlowerMarker() {
+    this.flowerMarker = this.sunflower.clone()
+    this.flowerMarker.rotation.y = Math.PI + 0.7
+    this.flowerMarker.traverse((child) => {
+      if (child.isMesh && child.name === 'Object_2') {
+        child.scale.set(0.3, 0.3, 0.3)
+        const material = child.material.clone()
+        material.wireframe = true
+        child.material = material
+      }
+    })
+    this.flowerMarker.visible = false
+    this.flowerMarker.matrixAutoUpdate = false
+  }
+
   setFlower() {
     this.loader.load(modelSrc, (gltf) => {
       this.sunflower = gltf.scene
@@ -228,7 +250,7 @@ class Experience {
     const markerMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.6,
     })
     const markerGeometry = new THREE.RingBufferGeometry(0.15, 0.2, 32).rotateX(
       -Math.PI / 2
@@ -242,7 +264,6 @@ class Experience {
   setController() {
     this.controller = this.renderer.xr.getController(0)
     this.scene.add(this.controller)
-
     this.controller.addEventListener('select', this.onSelect)
   }
 
