@@ -1,3 +1,5 @@
+import { handAnimationVisible, arOverlayVisible, loadingVisible } from './dom'
+
 /*
  * Returns true if navigator has xr with 'immersive-ar' capabilities
  * Returns false otherwise.
@@ -17,6 +19,17 @@ export const browserHasImmersiveArCompatibility = async () => {
   return false
 }
 
+export const displayInstructionMessage = () => {
+  setTimeout(() => {
+    arOverlayVisible(true)
+    handAnimationVisible(true)
+
+    setTimeout(() => {
+      handAnimationVisible(false)
+    }, 4000)
+  }, 1000)
+}
+
 /*
  * Create and display message when no XR capabilities are found.
  */
@@ -30,6 +43,7 @@ export const displayUnsupportedBrowserMessage = () => {
 
         * If you are using iOS, please try the latest version of the WebXR Viewer available on the App Store.
     `
+    loadingVisible(false)
   }
 }
 
@@ -42,7 +56,12 @@ const setOnSessionEnd = (session, onSessionEnd) => {
 }
 
 export const handleXRHitTest = (renderer, frame, callbacks) => {
-  const { onHitTestResultReady, onHitTestResultEmpty, onSessionEnd } = callbacks
+  const {
+    onHitTestResultReady,
+    onHitTestResultEmpty,
+    onSessionEnd,
+    onSessionStart,
+  } = callbacks
 
   const referenceSpace = renderer.xr.getReferenceSpace()
   const session = renderer.xr.getSession()
@@ -59,6 +78,9 @@ export const handleXRHitTest = (renderer, frame, callbacks) => {
             session.hitTestSourceRequested = true
 
             setOnSessionEnd(session, onSessionEnd)
+            onSessionStart()
+
+            displayInstructionMessage()
           })
       }
     })
@@ -66,7 +88,6 @@ export const handleXRHitTest = (renderer, frame, callbacks) => {
 
   if (session?.hitTestSource) {
     const hitTestResults = frame?.getHitTestResults(session?.hitTestSource)
-
     if (hitTestResults?.length) {
       const hit = hitTestResults[0]
 
@@ -81,5 +102,12 @@ export const handleXRHitTest = (renderer, frame, callbacks) => {
     } else {
       onHitTestResultEmpty()
     }
+  }
+}
+
+export const shutdownXR = async (renderer) => {
+  const session = renderer.xr.getSession()
+  if (session) {
+    await session.end()
   }
 }

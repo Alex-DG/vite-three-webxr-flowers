@@ -4,10 +4,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { ARButton } from 'three/examples/jsm/webxr/ARButton.js'
 
 import { getRandomFloat, getRandomNumber } from './utils/math'
+import { loadingVisible } from './utils/dom'
 import {
   browserHasImmersiveArCompatibility,
   displayUnsupportedBrowserMessage,
   handleXRHitTest,
+  shutdownXR,
 } from './utils/xr'
 
 import modelSrc from '../../assets/models/sunflower-v1.glb'
@@ -33,6 +35,7 @@ class Experience {
     this.hitTestSource = null
     this.localSpace = null
     this.hitTestSourceInitialized = false
+    this.endSessionBtn = document.querySelector('.xr-end-session-btn')
 
     this.start()
   }
@@ -55,13 +58,13 @@ class Experience {
 
   bind() {
     this.onSelect = this.onSelect.bind(this)
+    this.onEndSession = this.onEndSession.bind(this)
   }
 
   //////////////////////////////////////////////////////////////////////////////
 
   onSceneReady() {
-    this.loading = document.querySelector('.loading')
-    this.loading.style.opacity = '0'
+    loadingVisible(false)
     this.setARButton()
     console.log('🤖', 'Experience initialized!')
   }
@@ -100,7 +103,18 @@ class Experience {
     this.scales = []
 
     this.renderer.clear()
+
+    this.endSessionBtn?.removeEventListener('click', this.onEndSession)
     console.log('👋', 'Session ended')
+  }
+
+  onEndSession() {
+    shutdownXR(this.renderer)
+  }
+
+  onSessionStart() {
+    console.log('SET CLICK! ok!!!')
+    this.endSessionBtn?.addEventListener('click', this.onEndSession)
   }
 
   onHitTestResultReady(hitPoseTransformed) {
@@ -162,7 +176,10 @@ class Experience {
   setARButton() {
     // Create the AR button element, configure our XR session, and append it to the DOM.
     this.arButton = ARButton.createButton(this.renderer, {
-      requiredFeatures: ['hit-test'],
+      requiredFeatures: ['hit-test', 'dom-overlay'],
+      domOverlay: {
+        root: document.getElementById('ar-overlay'),
+      },
     })
     document.body.appendChild(this.arButton)
   }
@@ -273,8 +290,9 @@ class Experience {
       if (this.renderer.xr.isPresenting) {
         if (frame) {
           const callbacks = {
-            onHitTestResultEmpty: () => this.onHitTestResultEmpty(),
             onSessionEnd: () => this.onSessionEnd(),
+            onSessionStart: () => this.onSessionStart(),
+            onHitTestResultEmpty: () => this.onHitTestResultEmpty(),
             onHitTestResultReady: (hitPoseTransformed) =>
               this.onHitTestResultReady(hitPoseTransformed),
           }

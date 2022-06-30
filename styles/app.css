@@ -10,6 +10,9 @@ body {
   background-color: rgb(46 163 78 / 43%);
 }
 
+/**
+  * Loading
+  */
 #app > .loading {
   background: linear-gradient(45deg, rgb(224, 203, 81, 0.5), transparent);
   position: absolute;
@@ -52,7 +55,78 @@ body {
   }
 }
 
-#app > .container {
+/**
+  * AR overlay
+  */
+#app > #ar-overlay {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+  -webkit-transition: opacity 0.5s ease-out;
+}
+#app > #ar-overlay > .xr-end-session-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 999;
+  padding: 0.3em 0.5em;
+  font-size: 3rem;
+  text-shadow: 1px 1px #919091;
+  color: #fff;
+}
+#app > #ar-overlay > .hand-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+  -webkit-transition: opacity 0.5s ease-out;
+}
+#app > #ar-overlay > .hand-wrapper > .hand-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+  animation: linear infinite alternate;
+  animation-name: scan;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+  margin: 1em 0;
+  width: auto;
+  transform: rotateX(35deg) rotateY(-9deg) rotateZ(5deg);
+}
+#app > #ar-overlay > .hand-wrapper > span {
+  color: rgb(247, 247, 247);
+  text-align: center;
+  width: 100%;
+  font-weight: bold;
+  font-size: 1.6rem;
+  letter-spacing: 0.05em;
+  text-shadow: 2px 2px #444244;
+}
+
+@keyframes scan {
+  0% {
+    left: -8%;
+  }
+  100% {
+    left: 8%;
+  }
+}
+
+/**
+  * Intro
+  */
+#app > .introduction {
   margin-top: 60px;
   display: flex;
   flex-direction: column;
@@ -64,26 +138,14 @@ body {
   z-index: 1;
   width: 100%;
 }
-
-#app > .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1em;
-
-  position: absolute;
-  z-index: 1;
-  width: 100%;
-}
-#app > .container > h1,
+#app > .introduction > h1,
 p {
   color: rgb(247, 247, 247);
 }
-#app > .container a {
+#app > .introduction a {
   color: rgb(255, 105, 180);
 }
-#app > .container p {
+#app > .introduction p {
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
@@ -111,11 +173,17 @@ p {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 
+/**
+  * WebAR
+  */
 #ARButton {
   border: 2px solid rgb(255, 255, 255) !important;
   color: rgb(255, 255, 255) !important;
 }
 
+/**
+  * ThreeJS
+  */
 #experience {
   position: fixed;
 
