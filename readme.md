@@ -9,6 +9,8 @@ Upon entering AR, enjoy the flowers! 🌻
 
 - Sunflower original 3D model created by [zvanstone](https://sketchfab.com/3d-models/sunflower-3a9514b8df044abe809432201b8f1c6e) and edited using Blender.
 
+![sunflowers_in_the_garden](https://user-images.githubusercontent.com/4311684/176701584-5521e104-d703-47ec-9ed1-c9ee26185118.png)
+
 ## Setup
 
 Run the following commands:
