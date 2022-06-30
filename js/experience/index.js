@@ -14,6 +14,7 @@ import {
 
 import modelSrc from '../../assets/models/sunflower-v1.glb'
 import { createSunflower } from './utils/sunflower'
+import FirefliesMaterial from './fireflies/FireFliesMaterial'
 
 const DRACO_DECODER_PATH =
   'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/'
@@ -21,6 +22,9 @@ const DRACO_DECODER_PATH =
 class Experience {
   constructor(options) {
     this.container = options.container
+    this.defaultScalar = options.scale || 0
+    this.firefliesCount = options.firefliesCount || 250
+
     this.scene = new THREE.Scene()
     this.isReady = false
 
@@ -28,8 +32,6 @@ class Experience {
     this.flowers = []
     this.growthSpeed = []
     this.scales = []
-
-    this.defaultScalar = options.scale || 0
 
     // WebXR
     this.hitTestSource = null
@@ -49,6 +51,7 @@ class Experience {
     this.setCamera()
     this.setRenderer()
     this.setBox()
+    this.setFireflies()
     this.setFlower()
     this.setMarker()
     this.setController()
@@ -218,6 +221,32 @@ class Experience {
     this.flowerMarker.matrixAutoUpdate = false
   }
 
+  setFireflies() {
+    this.firefliesMaterial = new FirefliesMaterial()
+    const firefliesGeometry = new THREE.BufferGeometry()
+    const positionArray = new Float32Array(this.firefliesCount * 3)
+    const scaleArray = new Float32Array(this.firefliesCount) // add scale randomness
+
+    for (let i = 0; i < this.firefliesCount; i++) {
+      positionArray[i * 3 + 0] = (Math.random() - 0.5) * 4
+      positionArray[i * 3 + 1] = Math.random() * 1.5
+      positionArray[i * 3 + 2] = (Math.random() - 0.5) * 4
+      scaleArray[i] = Math.random()
+    }
+
+    firefliesGeometry.setAttribute(
+      'position',
+      new THREE.BufferAttribute(positionArray, 3)
+    )
+    firefliesGeometry.setAttribute(
+      'aScale',
+      new THREE.BufferAttribute(scaleArray, 1)
+    )
+
+    this.fireflies = new THREE.Points(firefliesGeometry, this.firefliesMaterial)
+    this.scene.add(this.fireflies)
+  }
+
   setFlower() {
     this.loader.load(modelSrc, (gltf) => {
       this.sunflower = gltf.scene
@@ -302,11 +331,15 @@ class Experience {
   }
 
   update() {
-    const renderLoop = (_, frame) => {
+    const renderLoop = (time, frame) => {
       if (!this.isReady) return
 
       this.box.rotation.y += 0.01
       this.box.rotation.x += 0.01
+
+      if (this.firefliesMaterial) {
+        this.firefliesMaterial.uniforms.uTime.value = time
+      }
 
       if (this.renderer.xr.isPresenting) {
         if (frame) {
