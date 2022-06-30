@@ -142,9 +142,6 @@ body {
 p {
   color: rgb(247, 247, 247);
 }
-#app > .introduction a {
-  color: rgb(255, 105, 180);
-}
 #app > .introduction p {
   text-align: justify;
   hyphens: auto;
@@ -152,7 +149,6 @@ p {
   padding: 0.8em;
   margin: 1.5em;
   border-radius: 8px;
-  /* background-color: rgb(255, 105, 180); */
   background-color: rgb(11 12 10 / 20%);
 }
 #app > button {
