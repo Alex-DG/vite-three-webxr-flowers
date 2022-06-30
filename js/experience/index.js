@@ -14,7 +14,7 @@ import {
 
 import modelSrc from '../../assets/models/sunflower-v1.glb'
 import { createSunflower } from './utils/sunflower'
-import FirefliesMaterial from './fireflies/FireFliesMaterial'
+import FirefliesMaterial from './fireflies/FirefliesMaterial'
 
 const DRACO_DECODER_PATH =
   'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/js/libs/draco/'
